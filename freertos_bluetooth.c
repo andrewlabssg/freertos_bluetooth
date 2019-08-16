@@ -87,24 +87,21 @@ static void freertos_bluetoothStackTask(void *pvParameters)
             }
         }
 
-        // Ask Bluetooth stack how long we can sleep.
-        // timeout == 0, stack requires update.
-        // timeout == UINT32_MAX, sleep indefinitely (INCLUDE_vTaskSuspend must be defined to sleep forever).
+        // Determine duration stack can sleep.
         TickType_t ticks = gecko_can_sleep_ticks();
-
-        // Update stack if bluetooth_evt is free for use (already handled by user application).
-        if (ticks == 0 && (flags & BLUETOOTH_EVENT_FLAG_EVT_HANDLED))
+        if (ticks == 0) // Stack cannot sleep, has events to handle.
         {
-            flags |= BLUETOOTH_EVENT_FLAG_STACK;
-            continue;
+            if (flags & BLUETOOTH_EVENT_FLAG_EVT_HANDLED)   // bluetooth_evt is available.
+            {
+                flags |= BLUETOOTH_EVENT_FLAG_STACK;        // Continue to handle stack events.
+                continue;
+            }
+            else
+            {
+                ticks = portMAX_DELAY;  // Suspend while waiting for bluetooth_evt to be handled.
+            }
         }
-
-        // Calculate number of ticks task can sleep.
-        if (ticks == UINT32_MAX)
-        {
-            ticks = portMAX_DELAY;
-        }
-        else
+        else if (ticks != UINT32_MAX)   // Sleep for a specified duration.
         {
             // Convert to RTOS ticks.
             ticks = (ticks + BLUETOOTH_TO_RTOS_TICK - 1) / BLUETOOTH_TO_RTOS_TICK;
