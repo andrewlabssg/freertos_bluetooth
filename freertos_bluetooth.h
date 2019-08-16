@@ -28,6 +28,7 @@
 // =========
 
 typedef void (*wakeupCallback)(void);
+typedef errorcode_t(*bluetooth_stack_init_func)(void);
 
 // Variables.
 // ==========
@@ -38,7 +39,7 @@ extern volatile struct gecko_cmd_packet* bluetooth_evt;
 // Functions.
 // ==========
 
-void bluetooth_start_task(UBaseType_t ll_priority, UBaseType_t stack_priority);
+void bluetooth_start(UBaseType_t ll_priority, UBaseType_t stack_priority, bluetooth_stack_init_func initialize_bluetooth_stack);
 void BluetoothSetWakeupCallback(wakeupCallback cb);
 void BluetoothLLCallback(void);
 void BluetoothUpdate(void);

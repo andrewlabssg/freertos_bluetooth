@@ -169,14 +169,17 @@ void BluetoothUpdate(void)
  * Starts the Bluetooth tasks.
  * @param ll_priority
  * @param stack_priority
+ * @param initialize_bluetooth_stack
  */
-void bluetooth_start_task(UBaseType_t ll_priority, UBaseType_t stack_priority)
+void bluetooth_start(UBaseType_t ll_priority, UBaseType_t stack_priority, bluetooth_stack_init_func initialize_bluetooth_stack)
 {
     // Create the Bluetooth event group.
     bluetooth_event_flags = xEventGroupCreate();
 
     // Create the Bluetooth mutex for multiple task access.
     l_bluetoothMutex = xSemaphoreCreateMutex();
+
+    if (initialize_bluetooth_stack != NULL) initialize_bluetooth_stack();
 
     // Create the Bluetooth link-layer task.
     TaskHandle_t bluetoothLLHandle;
